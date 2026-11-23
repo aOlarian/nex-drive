@@ -1,0 +1,46 @@
+{
+  "name": "nex-drive",
+  "productName": "NexDrive",
+  "version": "0.5.6",
+  "description": "Desktop Google Drive client with persistent upload, download and sync queues",
+  "main": "main.js",
+  "author": "VEROBOTS S.R.L.",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "test": "node test/smoke.js && node test/sync-test.js && node test/sync-parallel-test.js && node test/maint-test.js",
+    "test:ui": "electron .",
+    "dist": "electron-builder --win nsis --x64 -c.win.signAndEditExecutable=false"
+  },
+  "devDependencies": {
+    "electron": "42.1.0",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "eu.verobots.nexdrive",
+    "productName": "NexDrive",
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "NexDrive",
+      "perMachine": false,
+      "allowElevation": false,
+      "runAfterFinish": true,
+      "artifactName": "nex-drive-install.exe"
+    },
+    "files": [
+      "package.json",
+      "main.js",
+      "preload.js",
+      "src/**/*",
+      "build/icon.png"
+    ],
+    "asar": true,
+    "directories": { "output": "dist", "buildResources": "build" }
+  }
+}

@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'">
+  <title>NexDrive</title>
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/views.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 19h10a4 4 0 0 0 .7-7.9A5.5 5.5 0 0 0 7.6 9.4 4.5 4.5 0 0 0 7.5 19Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M12 11v5m0-5-2.5 2.5M12 11l2.5 2.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>NexDrive</span>
+    </div>
+    <nav id="nav" class="nav" role="tablist" aria-label="Sections" hidden>
+      <button id="nav-files" class="navtab on" role="tab">Files <span id="nav-files-badge" class="navbadge"></span></button>
+      <button id="nav-sync" class="navtab" role="tab">Sync <span id="nav-sync-badge" class="navbadge"></span></button>
+      <button id="nav-maint" class="navtab" role="tab">Maintenance</button>
+    </nav>
+    <div class="spacer"></div>
+    <div id="account" class="account"></div>
+    <button id="btn-audit" class="band-btn" title="Look for public links and shared files">Check sharing</button>
+    <button id="btn-theme" class="band-btn icon-btn" title="Switch light / dark theme" aria-label="Switch light / dark theme">
+      <svg id="ico-theme-moon" class="ico-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg id="ico-theme-sun" class="ico-svg" viewBox="0 0 24 24" aria-hidden="true" hidden><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v2.5M12 19.5V22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M2 12h2.5M19.5 12H22M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+    <button id="btn-settings" class="band-btn icon-btn" title="Settings" aria-label="Settings"><svg class="ico-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.08a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.08a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.08a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
+    <button id="btn-logout" class="band-btn">Sign out</button>
+  </header>
+
+  <div id="activity-bar" class="actbar" hidden>
+    <span id="act-dot" class="act-dot idle" aria-hidden="true"></span>
+    <span id="act-text" class="act-text">Idle · 0/3 upload connections used</span>
+    <span id="act-meta" class="act-meta"></span>
+    <div class="spacer"></div>
+    <button id="act-pause" class="act-btn" hidden>Pause</button>
+    <button id="act-queue" class="act-btn">Queue</button>
+    <button id="act-log" class="act-btn">Activity log</button>
+  </div>
+
+  <section id="setup" class="setup" hidden>
+    <h2>Connect to Google Drive</h2>
+    <ol>
+      <li>Import the OAuth client file (type <b>Desktop app</b>) downloaded from Google Cloud Console: <button id="btn-import">Import JSON</button> <span id="import-state" class="muted"></span></li>
+      <li>Sign in with your Google account (your browser opens; the password never passes through this app): <button id="btn-login" class="primary">Sign in</button></li>
+    </ol>
+    <p id="setup-msg" class="error"></p>
+  </section>
+
+  <main id="main" class="main" hidden>
+    <section class="pane files" id="drop">
+      <div class="bar">
+        <button id="btn-up-files" class="primary">Add files</button>
+        <button id="btn-up-folder">Add folder</button>
+        <button id="btn-mkdir">New folder</button>
+        <button id="btn-download">Download</button>
+        <button id="btn-versions" disabled title="Previous versions of the selected file (select exactly one file)">Versions</button>
+        <button id="btn-trash" class="danger" title="Moves the selected items to the Drive Trash">Delete</button>
+        <label class="muted workers" title="Applies to uploads and downloads">If exists <select id="on-exists"><option value="skip">Skip</option><option value="replace">Replace</option><option value="rename">Rename (-1, -2…)</option></select></label>
+        <div class="spacer"></div>
+        <button id="btn-refresh" class="ghost">Refresh</button>
+      </div>
+      <nav id="crumbs" class="crumbbar" aria-label="Current path"></nav>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th class="chk"><input type="checkbox" id="chk-all" title="Select all (Ctrl+A)"></th><th>Name</th><th class="num">Size</th><th>Modified</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+        <p id="empty" class="muted pad" hidden>Empty folder. Drop files or folders here to add them to the upload queue.</p>
+      </div>
+      <div class="selinfo muted" id="selinfo"></div>
+      <div id="dropzone" class="dropzone" hidden>Drop here to add to the queue</div>
+    </section>
+
+    <section class="pane side">
+      <div class="tabs" role="tablist">
+        <button id="tab-up" class="tab on" role="tab">Uploads <span id="badge-up" class="badge"></span></button>
+        <button id="tab-dl" class="tab" role="tab">Downloads <span id="badge-dl" class="badge"></span></button>
+      </div>
+      <div id="view-up" class="view">
+        <div class="bar">
+          <button id="q-pause">Pause</button>
+          <button id="q-retry" class="ghost">Retry errors</button>
+          <button id="q-clear-done" class="ghost">Clear finished</button>
+          <button id="q-clear-all" class="danger">Clear all</button>
+          <label class="muted workers" title="Simultaneous upload connections">Connections <select id="q-workers"></select></label>
+        </div>
+        <div id="q-status" class="status"></div>
+        <div id="q-retry-banner" class="retry-banner" hidden></div>
+        <div class="progress"><div id="q-bar"></div></div>
+        <div id="q-summary" class="muted pad-s"></div>
+        <ul id="q-list" class="qlist"></ul>
+      </div>
+      <div id="view-dl" class="view" hidden>
+        <div class="bar">
+          <button id="d-cancel" class="danger">Stop</button>
+          <button id="d-retry" class="ghost">Retry errors</button>
+          <button id="d-clear-done" class="ghost">Clear finished</button>
+          <button id="d-clear-all" class="ghost">Clear list</button>
+        </div>
+        <div id="d-status" class="status"></div>
+        <div id="d-summary" class="muted pad-s"></div>
+        <ul id="d-list" class="qlist"></ul>
+      </div>
+    </section>
+  </main>
+
+  <main id="sync-view" class="page" hidden>
+    <div id="sync-home">
+      <div id="sync-commander" class="panes2">
+        <section class="pane cmd-pane" aria-label="Drive destination">
+          <div class="bar pane-head">
+            <span class="pane-title">Google Drive <span class="pill soft">Destination</span></span>
+            <div class="spacer"></div>
+            <button id="sd-refresh" class="ghost mini-btn" title="Refresh folder list">Refresh</button>
+            <button id="sd-mkdir" title="Create a folder inside the current Drive folder">New folder</button>
+          </div>
+          <nav id="sd-crumbs" class="crumbbar" aria-label="Drive path"></nav>
+          <div class="table-wrap">
+            <table><tbody id="sd-rows"></tbody></table>
+            <p id="sd-empty" class="muted pad" hidden>No subfolders here. The current folder is the destination.</p>
+          </div>
+          <div id="sd-dest-info" class="selinfo muted">Destination: My Drive</div>
+        </section>
+
+        <section class="pane cmd-pane" aria-label="This PC">
+          <div class="bar pane-head">
+            <span class="pane-title">This PC <span class="pill soft">Sources</span></span>
+            <div id="sp-roots" class="roots"></div>
+          </div>
+          <div class="crumbbar pc-bar">
+            <button id="sp-up" class="mini-btn" title="Go to the parent folder">Up</button>
+            <nav id="sp-crumbs" class="pathline" aria-label="Current PC folder"></nav>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th class="chk"><input type="checkbox" id="sp-all" title="Select all"></th><th>Name</th><th class="num">Size</th><th>Modified</th></tr></thead>
+              <tbody id="sp-rows"></tbody>
+            </table>
+            <div id="sp-more-wrap" class="more-wrap" hidden><button type="button" id="sp-more">Show more</button><button type="button" id="sp-more-all" class="ghost">Show all</button></div>
+            <p id="sp-empty" class="muted pad" hidden>This folder is empty.</p>
+          </div>
+          <div id="sp-info" class="selinfo muted"></div>
+        </section>
+      </div>
+
+      <div id="sync-splitter" class="splitter" role="separator" aria-orientation="horizontal" tabindex="0" title="Drag up or down to resize the commander (double-click to toggle size)"><span class="splitter-grip" aria-hidden="true"></span></div>
+
+      <form id="sync-form" class="card sync-setup" autocomplete="off">
+        <div class="setup-head">
+          <div class="setup-route"><span class="setup-title">New sync job</span><span id="sf-info" class="route-pill">Tick files or folders in This PC</span></div>
+          <button id="sf-start" type="submit" class="primary">Start sync</button>
+        </div>
+        <div class="setup-row">
+          <div class="field-group"><label for="sf-name">Job name</label><input id="sf-name" class="field" type="text" placeholder="e.g. Workspace → Backup"></div>
+          <div class="field-group"><label>Schedule</label><div id="sf-sched"></div></div>
+        </div>
+        <div class="setup-opts">
+          <fieldset class="opt-box">
+            <legend>When files are deleted on this PC</legend>
+            <div class="mode-list" role="radiogroup" aria-label="Deletion policy">
+              <label class="mode-opt"><input type="radio" name="sf-delmode" value="mark" checked><span><b>Safe: Track in Deleted list</b><small>Files stay in Drive and appear in Deleted so you decide what to delete or restore.</small></span></label>
+              <label class="mode-opt"><input type="radio" name="sf-delmode" value="keep"><span><b>Permanent backup</b><small>Ignore local deletions. Files stay in Drive permanently (best for photos/archives).</small></span></label>
+              <label class="mode-opt warn-opt"><input type="radio" name="sf-delmode" value="mirror"><span><b>Mirror: Remove from Drive</b><small>Automatically moves deleted local files to Drive Trash (recoverable 30 days).</small></span></label>
+            </div>
+          </fieldset>
+          <fieldset class="opt-box">
+            <legend>Versions &amp; folder scope</legend>
+            <div class="stack">
+              <label class="opt-toggle"><input id="sf-keep" type="checkbox" checked><span><b>Pin old file versions permanently</b><small>Drive always keeps old versions of changed files for 30 days. Enable this so Drive never expires them (uses Drive quota; manage in Files › Versions).</small></span></label>
+              <label id="sf-children-wrap" class="opt-toggle" hidden><input id="sf-children" type="checkbox" checked><span><b>Include future items added to this folder</b><small>New files or subfolders created in this folder later will be synced automatically.</small></span></label>
+            </div>
+          </fieldset>
+        </div>
+      </form>
+
+      <section class="card jobs-card">
+        <div class="bar flat">
+          <h3>Sync jobs</h3><span id="sj-summary" class="muted small"></span>
+          <div class="spacer"></div>
+          <button id="sj-retry-all" title="Resume paused uploads, retry failed files, and re-run all enabled sync jobs">Retry</button>
+          <button id="sj-deleted-all" title="Files marked as deleted in all jobs">Deleted</button>
+        </div>
+        <div class="table-wrap x">
+          <table class="jobs">
+            <thead><tr><th title="Drag rows to reorder upload priority (top = highest)">Job</th><th>Destination</th><th>Sources</th><th>Schedule</th><th>Last run</th><th>Status &amp; details</th><th class="num">Indexed</th><th>Actions</th></tr></thead>
+            <tbody id="sj-rows"></tbody>
+          </table>
+          <p id="sj-empty" class="muted pad">No sync jobs yet. Tick items in "This PC", pick a Drive destination folder, and click "Start sync".</p>
+        </div>
+      </section>
+    </div>
+
+    <div id="deleted-view" hidden>
+      <div class="card">
+        <div class="bar flat"><button id="dv-back">Back</button><h3 id="dv-title">Deleted files</h3><div class="spacer"></div><button id="dv-refresh" class="ghost">Refresh</button></div>
+        <p class="muted pad-s">These files were removed from this PC but are still in Drive. <b>Restore to PC</b> downloads them back to their original location. <b>Not deleted</b> keeps them in Drive and drops them from this list. <b>Delete from Drive</b> moves them to the Drive Trash.</p>
+        <div class="bar flat">
+          <label class="chkl"><input id="dv-all" type="checkbox"> Select all</label><span id="dv-count" class="muted"></span><div class="spacer"></div>
+          <button id="dv-restore" class="primary" title="Downloads the files to their original path on this PC">Restore to PC</button>
+          <button id="dv-keep" title="The files stay in Drive; the entries disappear from this list">Not deleted (keep in Drive)</button>
+          <button id="dv-delete" class="danger">Delete from Drive</button>
+          <button id="dv-delete-all" class="danger">Delete all from Drive</button>
+        </div>
+        <div id="dv-tree" class="tree" role="tree"></div>
+        <p id="dv-empty" class="muted pad" hidden>Nothing marked as deleted</p>
+      </div>
+    </div>
+  </main>
+
+  <main id="maint-view" class="page" hidden>
+    <form id="mt-form" class="card" autocomplete="off">
+      <h3 id="mt-title">Add cleanup rule</h3>
+      <div class="grid-form">
+        <label for="mt-path">Folder</label>
+        <div class="inline"><input id="mt-path" class="field" type="text" placeholder="C:\Folder\To\Clean"><button type="button" id="mt-browse">Browse…</button></div>
+        <label for="mt-days">Remove items older than</label>
+        <div class="inline"><input id="mt-days" class="field short" type="number" min="1" max="36500" value="30"> days</div>
+        <label for="mt-action">Action</label>
+        <div class="stack"><select id="mt-action"><option value="recycle">Move to Recycle Bin</option><option value="delete">Delete permanently</option></select>
+          <p id="mt-warn" class="warn" hidden>Warning: permanently deleted items skip the Recycle Bin and cannot be recovered.</p></div>
+        <label>Safety</label><label class="chkl"><input id="mt-synced" type="checkbox" checked> Only remove items already synced to Drive</label>
+        <label>Schedule</label><div id="mt-sched"></div>
+        <label>Status</label><label class="chkl"><input id="mt-enabled" type="checkbox" checked> Enabled</label>
+      </div>
+      <p class="muted small">A folder is removed as a whole only if EVERYTHING inside it is older than N days; otherwise only the old files inside are removed.</p>
+      <div class="bar flat"><button type="submit" id="mt-save" class="primary">Add rule</button><button type="button" id="mt-cancel" hidden>Cancel edit</button></div>
+    </form>
+    <section class="card">
+      <div class="bar flat"><h3>Cleanup rules</h3></div>
+      <div id="mt-rules"></div>
+      <p id="mt-empty" class="muted pad">No rules yet.</p>
+    </section>
+  </main>
+
+  <dialog id="audit-dlg">
+    <h3>Sharing check</h3><div id="audit-body" class="audit-body">Scanning…</div>
+    <div class="dlg-actions"><button id="audit-private-all" class="primary" hidden>Make everything public private</button><button id="audit-close">Close</button></div>
+  </dialog>
+  <dialog id="activity-dlg">
+    <h3>Activity log</h3><p class="muted small">Live record of scans, uploads, Google API errors, rate limits, and Mirror cleanups.</p>
+    <div id="act-err-bar" class="err-bar muted small"></div>
+    <div id="act-log-body" class="audit-body act-log-list"></div>
+    <div class="dlg-actions"><button id="act-open-errlog" class="ghost">Open error log file</button><button id="act-log-clear" class="ghost">Clear log</button><button id="act-log-close" class="primary">Close</button></div>
+  </dialog>
+  <dialog id="settings-dlg">
+    <h3>Settings</h3>
+    <div class="inline set-row">
+      <label for="set-theme">Appearance</label>
+      <select id="set-theme"><option value="system">System (follow Windows)</option><option value="light">Light</option><option value="dark">Dark</option></select>
+    </div>
+    <label class="chkl block"><input id="set-tray" type="checkbox"> Closing the window keeps NexDrive running in the system tray</label>
+    <label class="chkl block"><input id="set-login" type="checkbox"> Start NexDrive when Windows starts</label>
+    <label class="chkl block"><input id="set-limit-retry" type="checkbox"> Automatically retry uploads after a Google Drive limit pause</label>
+    <div class="inline set-sub">
+      <label for="set-limit-mins">Retry every</label>
+      <input id="set-limit-mins" class="field short" type="number" min="5" max="1440" value="60">
+      <span class="muted small">minutes (unchecked = wait 24 h)</span>
+    </div>
+    <div class="dlg-actions"><button id="set-close">Close</button></div>
+  </dialog>
+  <dialog id="versions-dlg">
+    <h3>Versions of <span id="ver-name"></span></h3><div id="ver-body" class="audit-body"></div>
+    <div class="dlg-actions"><button id="ver-close">Close</button></div>
+  </dialog>
+  <dialog id="mkdir-dlg">
+    <form id="mkdir-form">
+      <h3>New folder in <span id="mkdir-where"></span></h3>
+      <input id="mkdir-name" type="text" autocomplete="off" autofocus placeholder="Folder name" class="field">
+      <div class="dlg-actions"><button type="button" id="mkdir-cancel">Cancel</button><button type="submit" class="primary" id="mkdir-ok">Create</button></div>
+    </form>
+  </dialog>
+  <dialog id="confirm-dlg">
+    <h3 id="confirm-title">Confirm</h3>
+    <p id="confirm-msg" class="confirm-msg"></p>
+    <div class="dlg-actions"><button type="button" id="confirm-cancel">Cancel</button><button type="button" id="confirm-ok" class="primary">Continue</button></div>
+  </dialog>
+
+  <div id="toast" class="toast" hidden></div>
+  <script src="js/util.js"></script><script src="js/activity-view.js"></script><script src="js/queue-view.js"></script>
+  <script src="js/download-view.js"></script><script src="js/audit-view.js"></script><script src="js/versions-view.js"></script>
+  <script src="js/schedule-ui.js"></script><script src="js/sync-panes.js"></script><script src="js/sync-form.js"></script>
+  <script src="js/sync-sources-ui.js"></script><script src="js/sync-jobs.js"></script><script src="js/deleted-view.js"></script><script src="js/maint-view.js"></script>
+  <script src="js/nav.js"></script><script src="js/app.js"></script>
+</body>
+</html>
