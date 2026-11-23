@@ -6,6 +6,7 @@
 // §1 imports si instanta unica (o singura coada pe PC: doua instante ar urca de doua ori)
 const path = require('path');
 const { app, BrowserWindow, Menu, Tray, nativeImage } = require('electron');
+const { showEnterprise } = require('./enterprise.cjs');
 
 if (!app.requestSingleInstanceLock()) app.quit();
 
@@ -24,7 +25,7 @@ function createWindow() {
   });
   Menu.setApplicationMenu(null);
   win.loadFile(path.join(__dirname, 'src', 'renderer', 'index.html'));
-  win.once('ready-to-show', () => { if (!startHidden) win.show(); });
+  win.once('ready-to-show', () => { if (!startHidden) { win.show(); showEnterprise(win); } });
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   win.webContents.on('will-navigate', (e) => e.preventDefault()); // un fisier tras gresit pe fereastra nu schimba pagina
   win.on('close', (e) => {
@@ -40,6 +41,7 @@ function showWindow() {
   win.show();
   win.focus();
   win.webContents.focus();
+  showEnterprise(win);
 }
 
 function createTray() {

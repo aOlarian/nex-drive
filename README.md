@@ -1,5 +1,16 @@
 # NexDrive
 
+## Enterprise edition
+
+We build and deploy a paid Enterprise edition to order. Examples of what we can develop and extend for your organization are listed below.
+
+- Central control for scheduled transfers across servers and workstations, with bandwidth limits and retry policies.
+- Integrations with Google Workspace, internal storage and monitoring systems.
+- Role-based transfer rules and audit reports for admins, operators and reviewers.
+
+For an Enterprise edition or custom development, contact us at [verobots.eu](https://verobots.eu/) or [olarian.com](https://olarian.com/).
+
+
 NexDrive is a Windows desktop client for Google Drive. It keeps transfer queues on disk so large uploads can resume after an interruption or a restart. It also supports download queues, folder sync and a review of publicly shared links.
 
 ## Install and connect
